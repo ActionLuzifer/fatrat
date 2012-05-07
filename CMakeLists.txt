@@ -144,7 +144,7 @@ if(WITH_DOCUMENTATION)
 	set(QT_USE_QTHELP TRUE)
 endif(WITH_DOCUMENTATION)
 if(WITH_WEBINTERFACE)
-	pkg_check_modules(libmicrohttpd REQUIRED)
+	pkg_check_modules(libmicrohttpd REQUIRED "libmicrohttpd")
 	
 	if(libmicrohttpd_FOUND)
 		include_directories(${libmicrohttpd_INCLUDE_DIRS})
