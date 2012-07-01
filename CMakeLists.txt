@@ -17,10 +17,6 @@ include_directories(src)
 
 ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NARROW_ONLY)
 
-# If you remove the following line, the Boost ASIO code used in pion will make libtorrent's Boost ASIO code crash
-# due to a curious symbol name conflict
-#ADD_DEFINITIONS(-fvisibility-inlines-hidden)
-
 ADD_CUSTOM_TARGET(uninstall
 	COMMAND ${CMAKE_COMMAND} -E echo Use 'xargs rm < install_manifest.txt' to uninstall this program
 	)
@@ -93,6 +89,17 @@ if(WITH_BITTORRENT)
 	set(QT_USE_QTWEBKIT TRUE)
 	ADD_DEFINITIONS(-DTORRENT_USE_OPENSSL -DBOOST_ASIO_DYN_LINK)
 endif(WITH_BITTORRENT)
+
+if(WITH_TESTS)
+	find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+	
+	if (Boost_FOUND)
+		message(STATUS "Boost.Test found OK")
+		include_directories(${Boost_INCLUDE_DIRS})
+	else (Boost_FOUND)
+		message(FATAL_ERROR "No Boost.Test found")
+	endif (Boost_FOUND)
+endif(WITH_TESTS)
 
 if(WITH_JABBER)
 	pkg_check_modules(gloox REQUIRED "gloox >= 0.9.0.0")
@@ -544,6 +551,10 @@ set(fatrat_RCS
 	gfx/resources.qrc
 )
 
+if (WITH_TESTS)
+	add_subdirectory(tests)
+endif (WITH_TESTS)
+
 qt4_wrap_ui(fatrat_UIS_H ${fatrat_UIS})
 qt4_add_resources(fatrat_QRC_H gfx/resources.qrc)
 qt4_add_translation(lrelease_outputs locale/fatrat_cs_CZ.ts
@@ -555,10 +566,7 @@ add_executable(fatrat ${fatrat_SRCS} ${fatrat_MOC_SRCS} ${fatrat_UIS_H}
 ${fatrat_QRC_H} ${lrelease_outputs})
 add_executable(fatrat-conf src/fatrat-conf.cpp)
 
-# This used to be a workaround until it started causing the exact opposite... oh dear!
-#STRING(REPLACE "-mt" "" pion-net_LIBRARIES "${pion-net_LIBRARIES}")
-#message(STATUS ${pion-net_LIBRARIES})
-target_link_libraries(fatrat -ldl -lpthread ${QT_LIBRARIES} ${libtorrent_LDFLAGS} ${gloox_LDFLAGS} ${curl_LDFLAGS} ${Boost_LIBRARIES} ${pion-net_LIBRARIES} ${QT_ADDITIONAL_LIBS} ${XATTR_LIBRARIES} -export-dynamic)
+target_link_libraries(fatrat -ldl -lpthread ${QT_LIBRARIES} ${libtorrent_LDFLAGS} ${gloox_LDFLAGS} ${curl_LDFLAGS} ${Boost-date-time_LIBRARY} ${Boost_unit_test_framework_LIBRARY} ${QT_ADDITIONAL_LIBS} ${XATTR_LIBRARIES} -export-dynamic)
 target_link_libraries(fatrat-conf ${QT_LIBRARIES})
 
 set(fatrat_DEV_HEADERS

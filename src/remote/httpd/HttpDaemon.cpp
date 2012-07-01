@@ -201,25 +201,27 @@ bool HttpDaemon::tryProcessRequest(int s)
 	assert(m_clients.contains(s));
 
 	Client& c = m_clients[s];
-    int pos;
-    QByteArray req;
     HttpRequest& request = c.request;
     boost::shared_ptr<HttpResponse> response;
 
 	assert(c.state == Client::ReceivingHeaders);
 
-    // detect end-of-request (double \r\n)
-    pos = c.requestBuffer.indexOf("\r\n\r\n");
+	{
+		int pos;
+		QByteArray req;
+    	// detect end-of-request (double \r\n)
+	    pos = c.requestBuffer.indexOf("\r\n\r\n");
 
-    if (pos < 0) // request not complete yet
-		return false;
+    	if (pos < 0) // request not complete yet
+			return false;
 
-	// carve out the request
-    req = c.requestBuffer.left(pos+4);
+		// carve out the request
+	    req = c.requestBuffer.left(pos+4);
 
-	// this may be the body or another request
-    c.remnantBuffer = c.requestBuffer.mid(pos+4);
-	c.requestBuffer.clear();
+		// this may be the body or another request
+	    c.remnantBuffer = c.requestBuffer.mid(pos+4);
+		c.requestBuffer.clear();
+	}
 
 	parseHTTPRequest(request, req);
 
